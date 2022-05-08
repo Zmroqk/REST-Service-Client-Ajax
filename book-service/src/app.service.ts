@@ -1,8 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import Book from './book';
 
 @Injectable()
-export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+export class BookService {
+  books: Book[] = []
+
+  getAll(): Book[] {
+    return this.books;
+  }
+  getById(id: number): Book[] {
+    return this.books.filter((b) => b.id == id);
+  }
+  getByAuthor(author: string): Book[] {
+    return this.books.filter((b) => b.author == author);
+  }
+  createBook(book: Book) {
+    book.id = this.books[-1].id + 1;
+    this.books.push(book);
+  }
+  modifyBook(id: number, book: Book){
+    const selectedBook = this.books.find((b) => b.id == id);
+    if(!selectedBook){
+      throw new NotFoundException(id)
+    }
+    Object.apply(selectedBook, book);
+  }
+  deleteBook(id: number){
+    const index = this.books.findIndex((b) => b.id == id);
+    if(index == -1){
+      throw new NotFoundException(index);
+    }
+    this.books.splice(index, 1);
   }
 }

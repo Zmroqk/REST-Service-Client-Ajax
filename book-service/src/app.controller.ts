@@ -1,12 +1,22 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Query } from '@nestjs/common';
+import { BookService } from './app.service';
+import Book from './book';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly bookService: BookService) { }
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('all')
+  getAll(): Book[] {
+    return this.bookService.getAll();
   }
+  @Get('author/:author')
+  getByAuthor(@Query() author: string): Book[] {
+    return this.bookService.getByAuthor(author);
+  }
+  @Get(':id')
+  getById(@Query() id: number): Book[] {
+    return this.bookService.getById(id);
+  }
+  
 }

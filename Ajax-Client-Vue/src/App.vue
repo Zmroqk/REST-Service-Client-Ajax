@@ -9,6 +9,11 @@ const checked = ref(false);
 const booksData = ref([]);
 const fetchData = () => fetch("http://localhost:3000/all").then(res => { if(res.ok) return res.json(); else return null; }).then(data => booksData.value = data);
 
+const removeItem = async (id) => {
+   await fetch("http://localhost:3000/delete/" + id, { method: "DELETE" })
+   await fetchData();
+}
+
 onMounted(() => {
   fetchData();
 });
@@ -16,22 +21,57 @@ onMounted(() => {
 </script>
 
 <template>
-  <header>
-    <div class="logo">
-      <DocumentationIcon />
-    </div>
-    <BookForm :modifyMode="checked" />
-  </header>
+   <div class="main-container">
+      <header>
+         <div class="logo">
+            <DocumentationIcon />
+         </div>
+         <BookForm :modifyMode="checked" @on-submit="fetchData()"/>
+      </header>
 
-  <main>
-    <div v-for="book in booksData">
-      {{book.title}}
-    </div>
-  </main>
+      <main>
+         <div v-for="book in booksData" :key="book.id">
+            <div class="flex">
+               <div>
+                  {{book.title}}
+               </div>
+               <div>
+                  {{book.author}}
+               </div>
+               <div>
+                  {{book.score}}
+               </div>
+               <div>
+                  {{book.releaseDate}}
+               </div>
+            </div>
+            <div>
+               Description
+               <p>
+               {{book.description}}
+               </p>
+            </div>
+            <div>
+               <button>Modify</button>
+               <button @click="removeItem(book.id)">Remove</button>
+            </div>
+            <hr>
+         </div>
+      </main>
+  </div>
 </template>
 
 <style>
 @import "./assets/base.css";
+
+.flex {
+   display: flex;
+   align-content: space-around;
+   width: 600px;
+}
+.flex > div{
+   flex: 1;
+}
 
 #app {
   max-width: 1280px;
@@ -43,6 +83,10 @@ onMounted(() => {
 
 header {
   line-height: 1.5;
+}
+
+main {
+   margin-top: 20px;
 }
 
 .logo {
@@ -75,13 +119,16 @@ a,
     padding: 0 2rem;
   }
 
-  header {
+   header {
+      margin: 20px;
+   }
+
+  .main-container {
     display: flex;
-    place-items: center;
     padding-right: calc(var(--section-gap) / 2);
   }
 
-  header .wrapper {
+  .main-container .wrapper {
     display: flex;
     place-items: flex-start;
     flex-wrap: wrap;

@@ -26,7 +26,7 @@ export class BookService {
       if (!selectedBook) {
          throw new NotFoundException(id)
       }
-      Object.apply(selectedBook, book);
+      Object.assign(selectedBook, book);
    }
    deleteBook(id: number) {
       const index = this.books.findIndex((b) => b.id == id);

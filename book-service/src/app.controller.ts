@@ -15,7 +15,7 @@ export class AppController {
     return this.bookService.getByAuthor(author);
   }
   @Get(':id')
-  getById(@Param(ParseIntPipe) id: number): Book[] {
+  getById(@Param('id', ParseIntPipe) id: number): Book[] {
     return this.bookService.getById(id);
   }
   @Post('create')
@@ -23,11 +23,11 @@ export class AppController {
     this.bookService.createBook(book);
   }
   @Patch('modify/:id')
-  modifyBook(@Param(ParseIntPipe) id: number, @Body() book: Book) {
+  modifyBook(@Param('id', ParseIntPipe) id: number, @Body() book: Book) {
     this.bookService.modifyBook(id, book);
   }
   @Delete('delete/:id')
-  deleteBook(@Param(ParseIntPipe) id: number){
+  deleteBook(@Param('id', ParseIntPipe) id: number) {
     this.bookService.deleteBook(id);
   }
 }

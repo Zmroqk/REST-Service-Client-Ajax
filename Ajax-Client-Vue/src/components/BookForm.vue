@@ -1,12 +1,13 @@
 <script setup>
-import { ref } from "vue";
-defineProps({
+import { onBeforeUpdate, ref } from "vue";
+const props = defineProps({
   modifyMode: {
     type: Boolean,
     required: true,
   },
+  book: Object,
 });
-const emit = defineEmits("onSubmit");
+const emit = defineEmits("onSubmit", "onExitModify");
 
 const Book = ref({
   title: "",
@@ -20,21 +21,34 @@ const submitBook = async () => {
   await fetch("http://localhost:3000/create", {
     method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(Book.value)
+    body: JSON.stringify(Book.value),
   });
   emit("onSubmit");
 };
 
-const modifyBook = () => {
-  emit("onSubmit");
+const modifyBook = async () => {
+  await fetch("http://localhost:3000/modify/" + props.book.id, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(Book.value),
+  });
+  emit("onExitModify");
 };
+
+onBeforeUpdate(() => {
+  if (props.book && props.modifyMode) {
+    Book.value = props.book;
+  }
+});
 </script>
 
 <template>
   <div class="greetings">
-    <h1 class="green">{{ !modifyMode ? "Add book" : "Modify book" }}</h1>
+    <h1 class="green">{{ !props.modifyMode ? "Add book" : "Modify book" }}</h1>
     <div>
       <label for="input-title">Provide title:</label>
       <input name="input-title" v-model="Book.title" placeholder="Title" />
@@ -74,13 +88,23 @@ const modifyBook = () => {
       <div>Title: {{ Book.title }}</div>
       <div>Author: {{ Book.author }}</div>
       <div>Score: {{ Book.score }}</div>
-      <div>Release date: {{ Book.date }}</div>
+      <div>Release date: {{ Book.releaseDate }}</div>
       <div>Description: {{ Book.description }}</div>
     </div>
     <div>
+      <button @click.prevent="props.modifyMode ? modifyBook() : submitBook()">
+        {{ props.modifyMode ? "Modify" : "Add book" }}
+      </button>
       <button
-        @click.prevent="modifyMode ? modifyBook() : submitBook()"
-      >{{modifyMode ? "Modify" : "Add book"}}</button>
+        v-if="props.modifyMode"
+        @click="
+          () => {
+            emit('onExitModify');
+          }
+        "
+      >
+        Exit modify mode
+      </button>
     </div>
   </div>
 </template>
@@ -97,7 +121,7 @@ h3 {
 }
 
 button {
-   width: 100%;
+  width: 100%;
 }
 
 label {
